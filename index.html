@@ -1,0 +1,1172 @@
+<head>
+    <title>swatch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ff6b6b'/%3E%3Cstop offset='50%25' style='stop-color:%234ecdc4'/%3E%3Cstop offset='100%25' style='stop-color:%23ffe66d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@700&family=Koulen&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #d3dcd9;
+            margin: 0;
+            padding: 0;
+        }
+
+        #wrapper {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #fixed-header {
+            position: sticky;
+            top: 0;
+            background-color: #d3dcd9;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        #scrollable-content {
+            padding: 0 20px 20px 20px;
+        }
+
+        #mode-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-family: 'Koulen', cursive;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0.5;
+        }
+
+        body.dark-bg .mode-btn {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .mode-btn.active {
+            opacity: 1;
+            border-bottom-color: rgba(0, 0, 0, 0.8);
+        }
+
+        body.dark-bg .mode-btn.active {
+            border-bottom-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .mode-btn:hover {
+            opacity: 0.8;
+        }
+
+        #output {
+            width: 100%;
+            background-color: black;
+            color: white;
+            border-radius: 10px;
+            font-family: 'Koulen', cursive;
+            font-size: clamp(2rem, 8vw, 4rem);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            margin-bottom: 15px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-bg #output {
+            box-shadow: 0 4px 8px 0 rgba(255, 255, 255, 0.1), 0 6px 20px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        #picker-content {
+            width: 100%;
+            text-align: left;
+            padding: 0 20px;
+        }
+
+        #gradient-content {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #gradient-preview {
+            width: 100%;
+            height: 100%;
+        }
+
+        #gradient-controls {
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        body.gradient-mode #gradient-controls {
+            display: block;
+        }
+
+        body.gradient-mode #picker-content {
+            display: none;
+        }
+
+        body.gradient-mode #gradient-content {
+            display: flex;
+        }
+
+        body.picker-mode #gradient-content {
+            display: none;
+        }
+
+        body.gradient-mode #output {
+            background: none !important;
+            padding: 0;
+        }
+
+        body.gradient-mode .slider {
+            display: none;
+        }
+
+        body.gradient-mode #palette-section {
+            border-top: none;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-label {
+            font-family: 'Koulen', cursive;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+            display: block;
+            opacity: 0.6;
+        }
+
+        body.dark-bg .control-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #palette-selector-group {
+            display: none;
+        }
+
+        .gradient-options {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .gradient-option {
+            padding: 6px 12px;
+            background-color: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Koulen', cursive;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            opacity: 0.6;
+        }
+
+        body.dark-bg .gradient-option {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .gradient-option:hover {
+            opacity: 0.8;
+        }
+
+        .gradient-option.active {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.08);
+            border-color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-bg .gradient-option.active {
+            background-color: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            font-family: 'Koulen', cursive;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: transparent;
+        }
+
+        body.dark-bg .action-btn {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .action-btn:hover {
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark-bg .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .text {
+            background-color: transparent;
+            color: white;
+            border: 0;
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            font-family: 'Koulen', cursive;
+            max-width: 70%;
+            display: inline-block;
+        }
+
+        input.text:focus {
+            outline:none;
+        }
+
+        #rgb {
+            white-space: nowrap;
+        }
+
+        .slider {
+            border-radius: 10px;
+            display: block;
+            width: 100%;
+            height: clamp(30px, 8vw, 50px);
+            margin-bottom: 15px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 0, 255));
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            touch-action: none;
+        }
+
+        #red {
+        background: linear-gradient(to right, rgb(0, 0, 0), rgb(255, 0, 0));
+        }
+
+        #green {
+        background: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 255, 0));
+        }
+
+        #blue {
+        background: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 0, 255));
+        }
+
+        #brightness {
+        background: linear-gradient(to right, rgb(0, 0, 0), rgb(255, 255, 255));
+    }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 60%;
+            aspect-ratio: 1/1;
+            border-radius: 45%;
+            border: 3px solid white;
+            background: rgba(255,255,255,0.35);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            height: clamp(18px, 5vw, 30px);
+            width: clamp(18px, 5vw, 30px);
+            border-radius: 50%;
+            border: 3px solid white;
+            background: rgba(255,255,255,0.35);
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            #wrapper {
+                padding: 15px;
+            }
+
+            #output {
+                padding: 20px;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #output {
+                padding: 30px;
+            }
+        }
+
+        #palette-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .palette-row {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 10px;
+        }
+
+        body.gradient-mode .palette-row {
+            cursor: pointer;
+            margin-bottom: 10px;
+            padding: 10px;
+            pointer-events: auto;
+        }
+
+        body.gradient-mode .palette-row:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        body.gradient-mode .palette-row.selected {
+            background-color: rgba(0, 0, 0, 0.15);
+            outline: 3px solid rgba(0, 0, 0, 0.5);
+            outline-offset: -3px;
+        }
+
+        body.dark-bg.gradient-mode .palette-row:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        body.dark-bg.gradient-mode .palette-row.selected {
+            background-color: rgba(255, 255, 255, 0.15);
+            outline: 3px solid rgba(255, 255, 255, 0.6);
+            outline-offset: -3px;
+        }
+
+        .palette-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        body.gradient-mode .palette-header {
+            margin-bottom: 0;
+        }
+
+        body.gradient-mode .palette-name {
+            pointer-events: none;
+            border-bottom-color: transparent !important;
+        }
+
+        .palette-preview {
+            display: none;
+            gap: 4px;
+            margin-left: 10px;
+        }
+
+        body.gradient-mode .palette-preview {
+            display: flex;
+        }
+
+        .preview-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        body.gradient-mode .palette-container {
+            display: none;
+        }
+
+        body.gradient-mode .palette-actions,
+        body.gradient-mode #new-palette-btn {
+            display: none;
+        }
+
+        .palette-name {
+            font-family: 'Koulen', cursive;
+            font-size: 1.2rem;
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 5px;
+            transition: border-color 0.2s;
+        }
+
+        .palette-name:hover {
+            border-bottom-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .palette-name:focus {
+            outline: none;
+            border-bottom-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .palette-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        .icon-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .palette-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+        }
+
+        .add-to-palette {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: transparent;
+            border: 3px dashed rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-to-palette:hover {
+            border-color: rgba(0, 0, 0, 0.5);
+            color: rgba(0, 0, 0, 0.5);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .add-to-palette:active {
+            transform: scale(0.95);
+        }
+
+        .palette-colors {
+            display: contents;
+        }
+
+        #new-palette-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-family: 'Koulen', cursive;
+            font-size: 1rem;
+            color: rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #new-palette-btn:hover {
+            border-color: rgba(0, 0, 0, 0.4);
+            color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .swatch {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .swatch:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .swatch:active {
+            transform: scale(0.95);
+        }
+
+        .swatch .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background-color: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .swatch:hover .delete-btn {
+            display: flex;
+        }
+
+        @media (max-width: 480px) {
+            .palette-container {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+        }
+
+        /* Dark background adaptations */
+        body.dark-bg #palette-section {
+            border-top-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-bg .palette-row {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body.dark-bg .palette-name {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        body.dark-bg .palette-name:hover {
+            border-bottom-color: rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark-bg .palette-name:focus {
+            border-bottom-color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.dark-bg .icon-btn {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        body.dark-bg .icon-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        body.dark-bg .add-to-palette {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-bg .add-to-palette:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark-bg #new-palette-btn {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        body.dark-bg #new-palette-btn:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script>
+        var [red,green,blue]=[0,0,0];
+        var hex = "000";
+        var hold = [0,0,0];
+        var palettes = [];
+        var nextPaletteId = 1;
+        var currentMode = 'picker';
+        var selectedPaletteId = null;
+        var currentGradientType = 'linear-right';
+
+        function update(elem){
+            
+            //Update RGB values if new hex code entered
+            if (elem == "hex") {
+                [red,green,blue] = hexToRGB(hex);
+            }
+
+            //Update red
+            $('#red').css('background',"linear-gradient(to right, rgb(0,"+green+","+blue+"), rgb(255,"+green+","+blue+"))");
+
+            //Update green
+            $('#green').css('background',"linear-gradient(to right, rgb("+red+",0,"+blue+"), rgb("+red+",255,"+blue+"))");
+
+            //Update blue
+            $('#blue').css('background',"linear-gradient(to right, rgb("+red+","+green+",0), rgb("+red+","+green+",255))");
+
+            //Update RGB sliders
+            if(['brightness','hex'].includes(elem)){
+                //If brightness slider, update sliders with new red,green,blue values. Don't update hold.
+                $('#red').val(red);
+                $('#green').val(green);
+                $('#blue').val(blue);
+            }
+
+            if (['red','green','blue','hex'].includes(elem)) {
+                //If non-brightness slider, store new color values in hold
+                hold = [red,green,blue,get_brightness([red,green,blue])/2.55];
+                   //Set gradient and position for brightness slider
+                $('#brightness').css('background',"linear-gradient(to right, rgb(0,0,0), rgb("+hold[0]+","+hold[1]+","+hold[2]+") "+hold[3]+"%, rgb(255,255,255))");
+                $('#brightness').val(hold[3]);
+            }
+
+            //Update readout
+            $('#rgb').html(red+", "+green+", "+blue);
+
+            if(!(['hex'].includes(elem))) {
+                hex = "#"+rgbToHex(red,green,blue);
+            }
+            $('#hex').val(hex);
+
+            $('#output, .text').css('background',hex);
+
+            //Set text color
+            var b = get_brightness();
+            var contrast = Math.round((255-b)/255)*255;
+            var contrast2 = 255-b;
+            $('#output, .text').css('color', 'rgb('+(contrast)+','+contrast+','+contrast+')');
+            const bgColor = 'rgb('+contrast2+','+contrast2+','+contrast2+')';
+            $('body').css('background-color', bgColor);
+            $('#fixed-header').css('background-color', bgColor);
+
+            // Toggle dark background class for palette interface
+            if (contrast2 < 128) {
+                $('body').addClass('dark-bg');
+            } else {
+                $('body').removeClass('dark-bg');
+            }
+        };
+
+        function rgbToHex(r, g, b) {
+          if (r > 255 || g > 255 || b > 255 || r < 0 || g < 0 || b < 0)
+        throw new Error('Invalid color component');
+        return ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+
+        function isValidHexCode(str) {
+        const regex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+        return regex.test(str);
+        }
+
+        function hexToRGB(hex) {
+        // Remove the '#' from the beginning
+        hex = hex.replace('#', '');
+        
+        // Check if the hex code is in the shorthand form (3 characters)
+        if (hex.length === 3) {
+            // Expand the shorthand form to full form (e.g., 'ABC' -> 'AABBCC')
+            hex = hex.split('').map(char => char + char).join('');
+        }
+
+        // Convert hex code to an RGB array
+        const rgb = [];
+        for (let i = 0; i < hex.length; i += 2) {
+            const decimalValue = parseInt(hex.substring(i, i + 2), 16);
+            rgb.push(decimalValue);
+        }
+
+        return rgb;
+        }
+
+        function get_brightness(input=[red,green,blue]) {
+            var b = 0;
+            [red,green,blue].forEach(function(element){
+                b += parseInt(element);
+            });
+            return Math.round(b/3);
+        }
+
+        function createNewPalette() {
+            const palette = {
+                id: nextPaletteId++,
+                name: `Palette ${palettes.length + 1}`,
+                colors: []
+            };
+            palettes.push(palette);
+            savePalettes();
+            renderAllPalettes();
+        }
+
+        function addToPalette(paletteId) {
+            const palette = palettes.find(p => p.id === paletteId);
+            // Ensure hex has # prefix
+            const normalizedHex = hex.startsWith('#') ? hex : '#' + hex;
+            if (palette && !palette.colors.includes(normalizedHex) && palette.colors.length < 6) {
+                palette.colors.push(normalizedHex);
+                savePalettes();
+                renderAllPalettes();
+            }
+        }
+
+        function removeFromPalette(paletteId, color) {
+            const palette = palettes.find(p => p.id === paletteId);
+            if (palette) {
+                palette.colors = palette.colors.filter(c => c !== color);
+                savePalettes();
+                renderAllPalettes();
+            }
+        }
+
+        function deletePalette(paletteId) {
+            palettes = palettes.filter(p => p.id !== paletteId);
+            // Reset selected palette if it was deleted
+            if (selectedPaletteId === paletteId) {
+                selectedPaletteId = palettes.length > 0 ? palettes[0].id : null;
+                if (currentMode === 'gradient') {
+                    updateGradientDisplay();
+                }
+            }
+            savePalettes();
+            renderAllPalettes();
+        }
+
+        function renamePalette(paletteId, newName) {
+            const palette = palettes.find(p => p.id === paletteId);
+            if (palette) {
+                palette.name = newName;
+                savePalettes();
+            }
+        }
+
+        function loadColor(color) {
+            hex = color;
+            update('hex');
+        }
+
+        function savePalettes() {
+            localStorage.setItem('colorPalettes', JSON.stringify({
+                palettes: palettes,
+                nextId: nextPaletteId
+            }));
+        }
+
+        function loadPalettes() {
+            const saved = localStorage.getItem('colorPalettes');
+            if (saved) {
+                const data = JSON.parse(saved);
+                palettes = data.palettes || [];
+                nextPaletteId = data.nextId || 1;
+
+                // Fix any colors missing # prefix
+                palettes.forEach(palette => {
+                    palette.colors = palette.colors.map(color =>
+                        color.startsWith('#') ? color : '#' + color
+                    );
+                });
+                savePalettes(); // Save the fixed palettes
+            }
+            if (palettes.length === 0) {
+                createNewPalette();
+            }
+            renderAllPalettes();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            $('body').removeClass('picker-mode gradient-mode').addClass(mode + '-mode');
+            $('.mode-btn').removeClass('active');
+            $(`[data-mode="${mode}"]`).addClass('active');
+
+            if (mode === 'gradient') {
+                if (!selectedPaletteId && palettes.length > 0) {
+                    selectedPaletteId = palettes[0].id;
+                }
+                updateGradientDisplay();
+                updatePaletteSelector();
+            }
+        }
+
+        function updatePaletteSelector() {
+            // Update palette row selection in gradient mode
+            $('.palette-row').removeClass('selected');
+            $(`.palette-row[data-palette-id="${selectedPaletteId}"]`).addClass('selected');
+        }
+
+        function updateGradientDisplay() {
+            const palette = palettes.find(p => p.id == selectedPaletteId);
+            if (!palette || palette.colors.length === 0) {
+                $('#gradient-preview').css('background', 'rgba(0,0,0,0.1)');
+                $('.action-btn').prop('disabled', true);
+                return;
+            }
+
+            $('.action-btn').prop('disabled', false);
+            // If only 1 color, duplicate it to make a solid color gradient
+            const colors = palette.colors.length === 1
+                ? [palette.colors[0], palette.colors[0]]
+                : palette.colors;
+            const colorStops = colors.join(', ');
+            let gradientCSS = '';
+
+            switch(currentGradientType) {
+                case 'linear-right':
+                    gradientCSS = `linear-gradient(to right, ${colorStops})`;
+                    break;
+                case 'linear-bottom':
+                    gradientCSS = `linear-gradient(to bottom, ${colorStops})`;
+                    break;
+                case 'linear-diagonal':
+                    gradientCSS = `linear-gradient(135deg, ${colorStops})`;
+                    break;
+                case 'radial':
+                    gradientCSS = `radial-gradient(circle, ${colorStops})`;
+                    break;
+            }
+
+            $('#gradient-preview').css('background', gradientCSS);
+        }
+
+        function selectGradientType(type) {
+            currentGradientType = type;
+            $('.gradient-option').removeClass('active');
+            $(`[data-gradient-type="${type}"]`).addClass('active');
+            updateGradientDisplay();
+        }
+
+        function copyGradientCSS() {
+            const palette = palettes.find(p => p.id === selectedPaletteId);
+            if (!palette || palette.colors.length < 2) return;
+
+            const colorStops = palette.colors.join(', ');
+            let gradientCSS = '';
+
+            switch(currentGradientType) {
+                case 'linear-right':
+                    gradientCSS = `background: linear-gradient(to right, ${colorStops});`;
+                    break;
+                case 'linear-bottom':
+                    gradientCSS = `background: linear-gradient(to bottom, ${colorStops});`;
+                    break;
+                case 'linear-diagonal':
+                    gradientCSS = `background: linear-gradient(135deg, ${colorStops});`;
+                    break;
+                case 'radial':
+                    gradientCSS = `background: radial-gradient(circle, ${colorStops});`;
+                    break;
+            }
+
+            navigator.clipboard.writeText(gradientCSS).then(() => {
+                const btn = $('#copy-css-btn');
+                const originalText = btn.text();
+                btn.text('Copied!');
+                setTimeout(() => btn.text(originalText), 2000);
+            });
+        }
+
+        function downloadGradientPNG() {
+            const palette = palettes.find(p => p.id == selectedPaletteId);
+            if (!palette || palette.colors.length === 0) return;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1920;
+            canvas.height = 1080;
+            const ctx = canvas.getContext('2d');
+
+            // If only 1 color, duplicate it
+            const colorStops = palette.colors.length === 1
+                ? [palette.colors[0], palette.colors[0]]
+                : palette.colors;
+            const gradient = currentGradientType.startsWith('radial')
+                ? ctx.createRadialGradient(960, 540, 0, 960, 540, 960)
+                : currentGradientType === 'linear-bottom'
+                ? ctx.createLinearGradient(0, 0, 0, 1080)
+                : currentGradientType === 'linear-diagonal'
+                ? ctx.createLinearGradient(0, 0, 1920, 1080)
+                : ctx.createLinearGradient(0, 0, 1920, 0);
+
+            colorStops.forEach((color, i) => {
+                gradient.addColorStop(i / (colorStops.length - 1), color);
+            });
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1920, 1080);
+
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `gradient-${palette.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function switchToGradientMode(paletteId) {
+            selectedPaletteId = paletteId;
+            switchMode('gradient');
+        }
+
+        function renderAllPalettes() {
+            $('#palettes-container').empty();
+
+            palettes.forEach(function(palette) {
+                const paletteId = palette.id;
+                const row = $('<div class="palette-row"></div>')
+                    .attr('data-palette-id', paletteId);
+
+                const header = $('<div class="palette-header"></div>')
+                    .on('click', function(e) {
+                        selectedPaletteId = paletteId;
+                        updatePaletteSelector();
+                        updateGradientDisplay();
+                    });
+                const nameInput = $(`<input type="text" class="palette-name" value="${palette.name}" />`)
+                    .on('click', function(e) {
+                        if (currentMode === 'picker') {
+                            e.stopPropagation();
+                        }
+                    })
+                    .on('change', function() {
+                        renamePalette(palette.id, $(this).val());
+                    });
+
+                // Add preview swatches for gradient mode
+                const previewContainer = $('<div class="palette-preview"></div>')
+                    .on('click', function(e) {
+                        e.stopPropagation();
+                        selectedPaletteId = paletteId;
+                        updatePaletteSelector();
+                        updateGradientDisplay();
+                    });
+                palette.colors.forEach(function(color) {
+                    const previewSwatch = $('<div class="preview-swatch"></div>')
+                        .css('background-color', color);
+                    previewContainer.append(previewSwatch);
+                });
+
+                const actions = $('<div class="palette-actions"></div>');
+
+                const gradientBtn = $(`<button class="icon-btn ${palette.colors.length < 1 ? 'disabled' : ''}" title="View Gradient">◨</button>`)
+                    .on('click', function(e) {
+                        e.stopPropagation();
+                        if (palette.colors.length >= 1) {
+                            switchToGradientMode(palette.id);
+                        }
+                    });
+
+                const deleteBtn = $('<button class="icon-btn" title="Delete Palette">×</button>')
+                    .on('click', function(e) {
+                        e.stopPropagation();
+                        if (confirm(`Delete "${palette.name}"?`)) {
+                            deletePalette(palette.id);
+                        }
+                    });
+
+                actions.append(gradientBtn, deleteBtn);
+                header.append(nameInput, previewContainer, actions);
+
+                const container = $('<div class="palette-container"></div>');
+
+                palette.colors.forEach(function(color) {
+                    const swatch = $('<div class="swatch"></div>')
+                        .css('background-color', color)
+                        .on('click', function(e) {
+                            e.stopPropagation();
+                            loadColor(color);
+                        });
+
+                    const deleteSwatchBtn = $('<div class="delete-btn">×</div>')
+                        .on('click', function(e) {
+                            e.stopPropagation();
+                            removeFromPalette(palette.id, color);
+                        });
+
+                    swatch.append(deleteSwatchBtn);
+                    container.append(swatch);
+                });
+
+                // Only show add button if less than 6 colors
+                if (palette.colors.length < 6) {
+                    const addBtn = $('<button class="add-to-palette">+</button>')
+                        .on('click', function(e) {
+                            e.stopPropagation();
+                            addToPalette(palette.id);
+                        });
+                    container.append(addBtn);
+                }
+                row.append(header, container);
+                $('#palettes-container').append(row);
+            });
+        }
+
+        $(document).ready(function(){
+            loadPalettes();
+            switchMode('picker');
+
+            // Event delegation for palette row clicks
+            $('#palettes-container').on('click', '.palette-row', function(e) {
+                const paletteId = parseInt($(this).attr('data-palette-id'));
+                selectedPaletteId = paletteId;
+                updatePaletteSelector();
+                updateGradientDisplay();
+            });
+
+            $('.mode-btn').on('click', function() {
+                switchMode($(this).data('mode'));
+            });
+
+            $('#new-palette-btn').on('click', function() {
+                createNewPalette();
+            });
+
+            $('.gradient-option').on('click', function() {
+                selectGradientType($(this).data('gradient-type'));
+            });
+
+            $('#copy-css-btn').on('click', function() {
+                copyGradientCSS();
+            });
+
+            $('#download-png-btn').on('click', function() {
+                downloadGradientPNG();
+            });
+
+            $('.text').on('input',function(){
+                var new_val = $(this).val();
+                if (isValidHexCode(new_val)) {
+                    hex = new_val;
+                    update('hex');
+                }
+             });
+
+
+            $(".slider").on("input",function(){
+                switch (this.id) {
+                    case 'red':
+                        red = parseInt($(this).val());
+                        break;
+                    case 'green':
+                        green = parseInt($(this).val());
+                        break;
+                    case 'blue':
+                        blue = parseInt($(this).val());
+                        break;
+                    case 'brightness':
+                        //Get current position of slider
+                        var bright_val = $('#brightness').val();
+ 
+                        //Test based on direction of slider
+                        if (bright_val > hold[3]) { //If slider going up
+                            var red_slope = (255-hold[0])/(99-hold[3]);
+                            red = hold[0] + Math.round(red_slope*(bright_val-hold[3]));
+
+                            var green_slope = (255-hold[1])/(99-hold[3]);
+                            green = hold[1] + Math.round(green_slope*(bright_val-hold[3]));
+
+                            var blue_slope = (255-hold[2])/(99-hold[3]);
+                            blue = hold[2] + Math.round(blue_slope*(bright_val-hold[3]));
+                        }
+                        else { //if slider going down
+                            var red_slope = hold[0]/hold[3]-0;
+                            red = hold[0] - Math.round(red_slope*(hold[3]-bright_val));
+
+                            var green_slope = hold[1]/hold[3];
+                            green = hold[1] - Math.round(green_slope*(hold[3]-bright_val));
+
+                            var blue_slope = hold[2]/hold[3]-0;
+                            blue = hold[2] - Math.round(blue_slope*(hold[3]-bright_val));
+                        }
+                        break;
+                }
+            update(this.id);
+            });
+        });
+
+    </script>
+</head>
+
+<body class="picker-mode">
+    <div id="wrapper">
+        <div id="fixed-header">
+            <div id="mode-toggle">
+                <button class="mode-btn active" data-mode="picker">Picker</button>
+                <button class="mode-btn" data-mode="gradient">Gradient</button>
+            </div>
+
+            <div id="output">
+                <div id="picker-content">
+                    rgb: <div class='text' id="rgb">0,0,0</div><br/>
+                    hex: <input class="text edit" id="hex" value="#000">
+                </div>
+                <div id="gradient-content">
+                    <div id="gradient-preview"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="scrollable-content">
+            <div id="gradient-controls">
+                <div class="control-group">
+                    <label class="control-label">Gradient Type</label>
+                    <div class="gradient-options">
+                        <div class="gradient-option active" data-gradient-type="linear-right">Horizontal</div>
+                        <div class="gradient-option" data-gradient-type="linear-bottom">Vertical</div>
+                        <div class="gradient-option" data-gradient-type="linear-diagonal">Diagonal</div>
+                        <div class="gradient-option" data-gradient-type="radial">Radial</div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="action-buttons">
+                        <button class="action-btn" id="copy-css-btn">Copy CSS</button>
+                        <button class="action-btn" id="download-png-btn">Download PNG</button>
+                    </div>
+                </div>
+            </div>
+
+            <input type="range" min="0" max="255" value="0" class="slider" id="red">
+            <input type="range" min="0" max="255" value="0" class="slider" id="green">
+            <input type="range" min="0" max="255" value="0" class="slider" id="blue">
+            <input type="range" min="0" max="99" value="0" class="slider" id="brightness">
+
+            <div id="palette-section">
+                <div id="palettes-container"></div>
+                <button id="new-palette-btn">+ New Palette</button>
+            </div>
+        </div>
+    </div>
+</body>
