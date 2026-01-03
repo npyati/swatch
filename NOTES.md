@@ -90,4 +90,5 @@ palettes = [
 - SVG export/import: Full SVG file support with drag-and-drop, making palettes portable and shareable
 - Polish refinements: Fixed SVG export aesthetics, improved drag-and-drop UX, contrast-sensitive export icon, overlay toggle state persistence
 - Final features: Eye dropper tool (Chrome EyeDropper API), removed unnecessary toast notifications
+- UI refinement: Changed eye dropper to monochromatic ◎ icon, improved button layout and spacing
 - **ALL TODOS COMPLETE** - Project feature-complete and polished!
