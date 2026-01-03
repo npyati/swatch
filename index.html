@@ -51,6 +51,7 @@
             cursor: pointer;
             transition: all 0.2s;
             opacity: 0.5;
+            color: rgba(0, 0, 0, 0.7);
         }
 
         body.dark-bg .mode-btn {
@@ -60,10 +61,12 @@
         .mode-btn.active {
             opacity: 1;
             border-bottom-color: rgba(0, 0, 0, 0.8);
+            color: rgba(0, 0, 0, 0.9);
         }
 
         body.dark-bg .mode-btn.active {
             border-bottom-color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .mode-btn:hover {
@@ -99,6 +102,8 @@
             width: 100%;
             text-align: left;
             padding: 0 20px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         #gradient-content {
@@ -106,6 +111,8 @@
             height: 100%;
             border-radius: 10px;
             overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         #game-content {
@@ -113,6 +120,8 @@
             height: 100%;
             border-radius: 10px;
             overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         #game-split {
@@ -147,15 +156,26 @@
         #gradient-preview {
             width: 100%;
             height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #gradient-controls {
             display: none;
             margin-bottom: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         body.gradient-mode #gradient-controls {
             display: block;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         body.gradient-mode #picker-content {
@@ -417,6 +437,8 @@
             background: linear-gradient(to right, rgb(0, 0, 0), rgb(0, 0, 255));
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
             touch-action: none;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         #red {
@@ -464,6 +486,31 @@
                 padding: 20px;
                 margin-bottom: 15px;
             }
+
+            .preview-swatch {
+                width: 16px;
+                height: 16px;
+            }
+
+            .palette-preview {
+                max-width: 110px;
+                gap: 3px;
+            }
+
+            /* Ensure minimum 44px touch targets */
+            .mode-btn {
+                min-height: 44px;
+                padding: 10px;
+            }
+
+            .action-btn {
+                min-height: 44px;
+            }
+
+            .icon-btn {
+                min-width: 44px;
+                min-height: 44px;
+            }
         }
 
         @media (min-width: 768px) {
@@ -476,6 +523,8 @@
             margin-top: 30px;
             padding-top: 20px;
             border-top: 2px solid rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
 
         .palette-row {
@@ -532,6 +581,8 @@
             display: none;
             gap: 4px;
             margin-left: 10px;
+            flex-wrap: wrap;
+            max-width: 140px;
         }
 
         body.gradient-mode .palette-preview {
@@ -543,6 +594,7 @@
             height: 20px;
             border-radius: 4px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
         }
 
         body.gradient-mode .palette-container {
@@ -765,6 +817,152 @@
             background-color: rgba(255, 255, 255, 0.03);
         }
 
+        /* Color Harmonies */
+        #color-harmonies {
+            margin-bottom: 20px;
+        }
+
+        body.gradient-mode #color-harmonies,
+        body.game-mode #color-harmonies {
+            display: none;
+        }
+
+        .harmony-section {
+            margin-bottom: 15px;
+        }
+
+        .harmony-label {
+            font-family: 'Koulen', cursive;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            opacity: 0.6;
+        }
+
+        body.dark-bg .harmony-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .harmony-swatches {
+            display: flex;
+            gap: 8px;
+        }
+
+        .harmony-swatch {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .harmony-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .harmony-swatch:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 480px) {
+            .harmony-swatch {
+                width: 40px;
+                height: 40px;
+            }
+
+            /* Better touch feedback on mobile */
+            .mode-btn:active {
+                transform: scale(0.92);
+                opacity: 1;
+            }
+
+            .action-btn:active {
+                transform: scale(0.95);
+            }
+
+            .gradient-option:active {
+                transform: scale(0.95);
+            }
+
+            .icon-btn:active {
+                transform: scale(0.9);
+            }
+
+            #new-palette-btn:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* Empty states */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(0, 0, 0, 0.4);
+            font-family: 'Koulen', cursive;
+            font-size: 1.1rem;
+        }
+
+        body.dark-bg .empty-state {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Drag and drop feedback */
+        body.drag-over::before {
+            content: 'Drop to import';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Koulen', cursive;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        body.dark-bg.drag-over::before {
+            background: rgba(255, 255, 255, 0.85);
+            color: rgba(0, 0, 0, 0.9);
+            border-color: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Toast notifications */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Koulen', cursive;
+            font-size: 0.95rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        body.dark-bg #toast {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 0, 0, 0.9);
+        }
+
         /* Drag and drop styles */
         .palette-row {
             cursor: grab;
@@ -916,12 +1114,25 @@
             } else {
                 document.body.classList.remove('dark-bg');
             }
+
+            // Update color harmonies
+            updateColorHarmonies();
         };
 
         function rgbToHex(r, g, b) {
           if (r > 255 || g > 255 || b > 255 || r < 0 || g < 0 || b < 0)
         throw new Error('Invalid color component');
         return ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+
+        function showToast(message, duration = 2000) {
+            const toast = qs('#toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
         }
 
         function isValidHexCode(str) {
@@ -957,6 +1168,225 @@
             return Math.round(b/3);
         }
 
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return [h * 360, s * 100, l * 100];
+        }
+
+        function hslToRgb(h, s, l) {
+            h = h / 360;
+            s = s / 100;
+            l = l / 100;
+            let r, g, b;
+
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        function getColorHarmonies(r, g, b) {
+            const [h, s, l] = rgbToHsl(r, g, b);
+            const harmonies = {};
+
+            // Complementary (180°)
+            const compH = (h + 180) % 360;
+            const compRgb = hslToRgb(compH, s, l);
+            harmonies.complementary = '#' + rgbToHex(compRgb[0], compRgb[1], compRgb[2]);
+
+            // Analogous (±30°)
+            const analog1H = (h + 30) % 360;
+            const analog2H = (h - 30 + 360) % 360;
+            harmonies.analogous1 = '#' + rgbToHex(...hslToRgb(analog1H, s, l));
+            harmonies.analogous2 = '#' + rgbToHex(...hslToRgb(analog2H, s, l));
+
+            // Triadic (120° intervals)
+            const tri1H = (h + 120) % 360;
+            const tri2H = (h + 240) % 360;
+            harmonies.triadic1 = '#' + rgbToHex(...hslToRgb(tri1H, s, l));
+            harmonies.triadic2 = '#' + rgbToHex(...hslToRgb(tri2H, s, l));
+
+            // Split Complementary (150°, 210°)
+            const split1H = (h + 150) % 360;
+            const split2H = (h + 210) % 360;
+            harmonies.splitComp1 = '#' + rgbToHex(...hslToRgb(split1H, s, l));
+            harmonies.splitComp2 = '#' + rgbToHex(...hslToRgb(split2H, s, l));
+
+            return harmonies;
+        }
+
+        function updateColorHarmonies() {
+            const harmonies = getColorHarmonies(red, green, blue);
+
+            // Update complementary
+            qs('#harmony-comp').style.backgroundColor = harmonies.complementary;
+
+            // Update analogous
+            qs('#harmony-analog1').style.backgroundColor = harmonies.analogous1;
+            qs('#harmony-analog2').style.backgroundColor = harmonies.analogous2;
+
+            // Update triadic
+            qs('#harmony-tri1').style.backgroundColor = harmonies.triadic1;
+            qs('#harmony-tri2').style.backgroundColor = harmonies.triadic2;
+
+            // Update split complementary
+            qs('#harmony-split1').style.backgroundColor = harmonies.splitComp1;
+            qs('#harmony-split2').style.backgroundColor = harmonies.splitComp2;
+        }
+
+        function exportColorAsSVG(hexColor) {
+            const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <metadata>
+    <swatch-color>${hexColor}</swatch-color>
+  </metadata>
+  <rect width="200" height="200" fill="${hexColor}"/>
+  <text x="100" y="190" font-family="Arial, sans-serif" font-size="14" fill="${getContrastColor(hexColor)}" text-anchor="middle">${hexColor}</text>
+</svg>`;
+
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `color-${hexColor.substring(1)}.svg`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(`Exported ${hexColor} as SVG`);
+        }
+
+        function exportPaletteAsSVG(palette) {
+            const numColors = palette.colors.length;
+            const width = 400;
+            const height = 200;
+            const stripeWidth = width / numColors;
+
+            let stripes = '';
+            palette.colors.forEach((color, i) => {
+                stripes += `  <rect x="${i * stripeWidth}" y="0" width="${stripeWidth}" height="${height}" fill="${color}"/>\n`;
+            });
+
+            const colorsData = palette.colors.join(',');
+            const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+  <metadata>
+    <swatch-palette name="${palette.name}">${colorsData}</swatch-palette>
+  </metadata>
+${stripes}
+  <text x="${width/2}" y="${height - 15}" font-family="Arial, sans-serif" font-size="16" fill="rgba(255,255,255,0.9)" text-anchor="middle" style="text-shadow: 0 1px 3px rgba(0,0,0,0.5);">${palette.name}</text>
+</svg>`;
+
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `palette-${palette.name.toLowerCase().replace(/\s+/g, '-')}.svg`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(`Exported palette as SVG`);
+        }
+
+        function getContrastColor(hexColor) {
+            const rgb = hexToRGB(hexColor);
+            const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+            return brightness > 128 ? '#000000' : '#FFFFFF';
+        }
+
+        function parseSVGFile(svgText) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(svgText, 'image/svg+xml');
+
+            // Check for single color
+            const colorMetadata = doc.querySelector('swatch-color');
+            if (colorMetadata) {
+                let hexColor = colorMetadata.textContent.trim();
+                // Ensure hex has # prefix
+                if (!hexColor.startsWith('#')) {
+                    hexColor = '#' + hexColor;
+                }
+                // Normalize to 6-character format if needed
+                if (hexColor.length === 4) {
+                    hexColor = '#' + hexColor[1] + hexColor[1] + hexColor[2] + hexColor[2] + hexColor[3] + hexColor[3];
+                }
+                loadColor(hexColor);
+                showToast(`Imported color ${hexColor}`);
+                switchMode('picker');
+                return;
+            }
+
+            // Check for palette
+            const paletteMetadata = doc.querySelector('swatch-palette');
+            if (paletteMetadata) {
+                const paletteName = paletteMetadata.getAttribute('name') || 'Imported Palette';
+                const colorsData = paletteMetadata.textContent.trim();
+                const colors = colorsData.split(',').map(c => c.trim());
+
+                const palette = {
+                    id: nextPaletteId++,
+                    name: paletteName,
+                    colors: colors
+                };
+                palettes.push(palette);
+                savePalettes();
+                renderAllPalettes();
+                showToast(`Imported palette: ${paletteName}`);
+                return;
+            }
+
+            showToast('Invalid SVG file - no color data found');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.body.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length === 0) return;
+
+            const file = files[0];
+            if (!file.name.endsWith('.svg')) {
+                showToast('Please drop an SVG file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                parseSVGFile(event.target.result);
+            };
+            reader.readAsText(file);
+        }
+
         function createNewPalette() {
             const palette = {
                 id: nextPaletteId++,
@@ -966,6 +1396,7 @@
             palettes.push(palette);
             savePalettes();
             renderAllPalettes();
+            showToast(`Created ${palette.name}`);
         }
 
         function addToPalette(paletteId) {
@@ -976,6 +1407,7 @@
                 palette.colors.push(normalizedHex);
                 savePalettes();
                 renderAllPalettes();
+                showToast(`Added ${normalizedHex} to ${palette.name}`);
             }
         }
 
@@ -989,6 +1421,8 @@
         }
 
         function deletePalette(paletteId) {
+            const palette = palettes.find(p => p.id === paletteId);
+            const paletteName = palette ? palette.name : 'Palette';
             palettes = palettes.filter(p => p.id !== paletteId);
             // Reset selected palette if it was deleted
             if (selectedPaletteId === paletteId) {
@@ -999,6 +1433,7 @@
             }
             savePalettes();
             renderAllPalettes();
+            showToast(`Deleted ${paletteName}`);
         }
 
         function renamePalette(paletteId, newName) {
@@ -1053,6 +1488,11 @@
                 if (!selectedPaletteId && palettes.length > 0) {
                     selectedPaletteId = palettes[0].id;
                 }
+                // Refresh overlay toggle state
+                qsa('.overlay-toggle').forEach(el => el.classList.remove('active'));
+                const activeToggle = qs(`.overlay-toggle[data-overlay-enabled="${overlaySettings.enabled}"]`);
+                if (activeToggle) activeToggle.classList.add('active');
+
                 updateGradientDisplay();
                 updatePaletteSelector();
             } else if (mode === 'game') {
@@ -1071,13 +1511,20 @@
         function updateGradientDisplay() {
             const palette = palettes.find(p => p.id == selectedPaletteId);
             if (!palette || palette.colors.length === 0) {
-                qs('#gradient-preview').style.background = 'rgba(0,0,0,0.1)';
+                qs('#gradient-preview').style.background = 'rgba(0,0,0,0.05)';
+                qs('#gradient-preview').innerHTML = `
+                    <div class="empty-state">
+                        <div>${!palette ? 'No palette selected' : 'This palette has no colors yet'}</div>
+                        <div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.7;">${!palette ? 'Select a palette below' : 'Switch to Picker mode to add colors'}</div>
+                    </div>
+                `;
                 qs('#gradient-canvas').style.display = 'none';
                 qsa('.action-btn').forEach(btn => btn.disabled = true);
                 return;
             }
 
             qsa('.action-btn').forEach(btn => btn.disabled = false);
+            qs('#gradient-preview').innerHTML = ''; // Clear any empty state message
             const colors = palette.colors.length === 1
                 ? [palette.colors[0], palette.colors[0]]
                 : palette.colors;
@@ -1159,10 +1606,7 @@
             }
 
             navigator.clipboard.writeText(gradientCSS).then(() => {
-                const btn = $('#copy-css-btn');
-                const originalText = btn.text();
-                btn.text('Copied!');
-                setTimeout(() => btn.text(originalText), 2000);
+                showToast('CSS copied to clipboard');
             });
         }
 
@@ -1170,32 +1614,45 @@
             const palette = palettes.find(p => p.id == selectedPaletteId);
             if (!palette || palette.colors.length === 0) return;
 
-            const canvas = document.createElement('canvas');
-            canvas.width = 1920;
-            canvas.height = 1080;
+            const btn = qs('#download-png-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Generating...';
+            btn.disabled = true;
 
-            const colors = palette.colors.length === 1
-                ? [palette.colors[0], palette.colors[0]]
-                : palette.colors;
+            // Use setTimeout to allow UI to update before heavy computation
+            setTimeout(() => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1920;
+                canvas.height = 1080;
 
-            // Render with or without overlay
-            renderGradientToCanvas(
-                canvas,
-                colors,
-                currentGradientType,
-                overlaySettings.enabled,
-                overlaySettings
-            );
+                const colors = palette.colors.length === 1
+                    ? [palette.colors[0], palette.colors[0]]
+                    : palette.colors;
 
-            canvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                const overlayPrefix = overlaySettings.enabled ? 'lowpoly-' : '';
-                a.download = `${overlayPrefix}gradient-${palette.name.toLowerCase().replace(/\s+/g, '-')}.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-            });
+                // Render with or without overlay
+                renderGradientToCanvas(
+                    canvas,
+                    colors,
+                    currentGradientType,
+                    overlaySettings.enabled,
+                    overlaySettings
+                );
+
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const overlayPrefix = overlaySettings.enabled ? 'lowpoly-' : '';
+                    a.download = `${overlayPrefix}gradient-${palette.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('PNG downloaded');
+
+                    // Reset button
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                });
+            }, 50);
         }
 
         // Delaunay Triangulation - Bowyer-Watson Algorithm
@@ -1775,6 +2232,16 @@
             const container = qs('#palettes-container');
             container.innerHTML = '';
 
+            if (palettes.length === 0) {
+                const emptyState = createElement('div', 'empty-state');
+                emptyState.innerHTML = `
+                    <div>No palettes yet</div>
+                    <div style="font-size: 0.9rem; margin-top: 8px; opacity: 0.7;">Click "+ New Palette" below to get started</div>
+                `;
+                container.appendChild(emptyState);
+                return;
+            }
+
             palettes.forEach(function(palette) {
                 const paletteId = palette.id;
                 const row = createElement('div', 'palette-row');
@@ -1877,6 +2344,15 @@
                     }
                 });
 
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'icon-btn';
+                exportBtn.title = 'Export as SVG';
+                exportBtn.textContent = '↓';
+                exportBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    exportPaletteAsSVG(palette);
+                });
+
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'icon-btn';
                 deleteBtn.title = 'Delete Palette';
@@ -1887,6 +2363,7 @@
                 });
 
                 actions.appendChild(gradientBtn);
+                actions.appendChild(exportBtn);
                 actions.appendChild(deleteBtn);
                 header.appendChild(nameInput);
                 header.appendChild(previewContainer);
@@ -2013,6 +2490,19 @@
                     swatch.addEventListener('click', function(e) {
                         e.stopPropagation();
                         loadColor(color);
+
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(color).then(() => {
+                            showToast(`Copied ${color}`);
+                            // Show visual feedback
+                            const originalBg = swatch.style.backgroundColor;
+                            swatch.style.outline = '3px solid rgba(255, 255, 255, 0.9)';
+                            swatch.style.outlineOffset = '-3px';
+                            setTimeout(() => {
+                                swatch.style.outline = '';
+                                swatch.style.outlineOffset = '';
+                            }, 300);
+                        });
                     });
 
                     const deleteSwatchBtn = createElement('div', 'delete-btn', '×');
@@ -2048,6 +2538,40 @@
             loadOverlaySettings();
             switchMode('picker');
 
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                // Don't trigger shortcuts when typing in input fields
+                if (e.target.tagName === 'INPUT' && e.target.type === 'text') return;
+
+                switch(e.key) {
+                    case '1':
+                        switchMode('picker');
+                        showToast('Switched to Picker mode');
+                        break;
+                    case '2':
+                        switchMode('gradient');
+                        showToast('Switched to Gradient mode');
+                        break;
+                    case '3':
+                        switchMode('game');
+                        showToast('Switched to Game mode');
+                        break;
+                    case 'c':
+                    case 'C':
+                        if (currentMode === 'picker') {
+                            navigator.clipboard.writeText(hex);
+                            showToast(`Copied ${hex}`);
+                        }
+                        break;
+                    case 'n':
+                    case 'N':
+                        if (currentMode === 'picker') {
+                            createNewPalette();
+                        }
+                        break;
+                }
+            });
+
             // Event delegation for palette row clicks
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.palette-row')) {
@@ -2067,6 +2591,60 @@
 
             qs('#new-palette-btn').addEventListener('click', function() {
                 createNewPalette();
+            });
+
+            qs('#export-color-svg').addEventListener('click', function() {
+                exportColorAsSVG(hex);
+            });
+
+            // Drag and drop for SVG import
+            let dragCounter = 0;
+
+            document.body.addEventListener('dragenter', function(e) {
+                // Only show overlay when dragging files from outside (not internal palette/color dragging)
+                if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+                    e.preventDefault();
+                    dragCounter++;
+                    document.body.classList.add('drag-over');
+                }
+            });
+
+            document.body.addEventListener('dragover', function(e) {
+                // Only prevent default for file drops
+                if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+                    e.preventDefault();
+                }
+            });
+
+            document.body.addEventListener('dragleave', function(e) {
+                if (e.dataTransfer && e.dataTransfer.types && e.dataTransfer.types.includes('Files')) {
+                    dragCounter--;
+                    if (dragCounter === 0) {
+                        document.body.classList.remove('drag-over');
+                    }
+                }
+            });
+
+            document.body.addEventListener('drop', function(e) {
+                // Only handle file drops for import
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    dragCounter = 0;
+                    handleDrop(e);
+                }
+            });
+
+            // Color harmony click handlers
+            qsa('.harmony-swatch').forEach(swatch => {
+                swatch.addEventListener('click', function() {
+                    const color = this.style.backgroundColor;
+                    // Convert rgb() to hex
+                    const rgb = color.match(/\d+/g);
+                    if (rgb) {
+                        const hexColor = '#' + rgbToHex(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
+                        loadColor(hexColor);
+                        showToast(`Loaded harmony color`);
+                    }
+                });
             });
 
             qsa('.gradient-option[data-gradient-type]').forEach(opt => {
@@ -2170,6 +2748,19 @@
                 });
             });
 
+            // Add click-to-copy for hex input
+            qs('#hex').addEventListener('click', function() {
+                this.select();
+                navigator.clipboard.writeText(this.value).then(() => {
+                    showToast(`Copied ${this.value}`);
+                    const originalColor = this.style.color;
+                    this.style.color = 'rgba(255, 255, 255, 0.5)';
+                    setTimeout(() => {
+                        this.style.color = originalColor;
+                    }, 200);
+                });
+            });
+
             qsa(".slider").forEach(slider => {
                 slider.addEventListener("input", function(){
                     switch (this.id) {
@@ -2221,8 +2812,8 @@
     <div id="wrapper">
         <div id="fixed-header">
             <div id="mode-toggle">
-                <button class="mode-btn active" data-mode="picker">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <button class="mode-btn active" data-mode="picker" aria-label="Picker mode (press 1)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                         <line x1="4" y1="6" x2="20" y2="6"/>
                         <circle cx="14" cy="6" r="2" fill="currentColor"/>
                         <line x1="4" y1="12" x2="20" y2="12"/>
@@ -2231,14 +2822,14 @@
                         <circle cx="16" cy="18" r="2" fill="currentColor"/>
                     </svg>
                 </button>
-                <button class="mode-btn" data-mode="gradient">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button class="mode-btn" data-mode="gradient" aria-label="Gradient mode (press 2)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <rect x="3" y="3" width="18" height="18" rx="2"/>
                         <line x1="3" y1="9" x2="21" y2="9"/>
                         <line x1="3" y1="15" x2="21" y2="15"/>
                     </svg>
                 </button>
-                <button class="mode-btn" data-mode="game">
+                <button class="mode-btn" data-mode="game" aria-label="Game mode (press 3)">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <circle cx="12" cy="12" r="6"/>
@@ -2250,7 +2841,8 @@
             <div id="output">
                 <div id="picker-content">
                     rgb: <div class='text' id="rgb">0,0,0</div><br/>
-                    hex: <input class="text edit" id="hex" value="#000">
+                    hex: <input class="text edit" id="hex" value="#000"><br/>
+                    <button id="export-color-svg" class="icon-btn text" style="margin-top: 10px; background: transparent; border: none; cursor: pointer; font-size: 1.2rem;" title="Export as SVG">↓</button>
                 </div>
                 <div id="gradient-content">
                     <div id="gradient-preview"></div>
@@ -2346,10 +2938,43 @@
                 </div>
             </div>
 
-            <input type="range" min="0" max="255" value="0" class="slider" id="red">
-            <input type="range" min="0" max="255" value="0" class="slider" id="green">
-            <input type="range" min="0" max="255" value="0" class="slider" id="blue">
-            <input type="range" min="0" max="99" value="0" class="slider" id="brightness">
+            <input type="range" min="0" max="255" value="0" class="slider" id="red" aria-label="Red color value">
+            <input type="range" min="0" max="255" value="0" class="slider" id="green" aria-label="Green color value">
+            <input type="range" min="0" max="255" value="0" class="slider" id="blue" aria-label="Blue color value">
+            <input type="range" min="0" max="99" value="0" class="slider" id="brightness" aria-label="Brightness">
+
+            <div id="color-harmonies">
+                <div class="harmony-section">
+                    <div class="harmony-label">Complementary</div>
+                    <div class="harmony-swatches">
+                        <div class="harmony-swatch" id="harmony-comp"></div>
+                    </div>
+                </div>
+
+                <div class="harmony-section">
+                    <div class="harmony-label">Analogous</div>
+                    <div class="harmony-swatches">
+                        <div class="harmony-swatch" id="harmony-analog1"></div>
+                        <div class="harmony-swatch" id="harmony-analog2"></div>
+                    </div>
+                </div>
+
+                <div class="harmony-section">
+                    <div class="harmony-label">Triadic</div>
+                    <div class="harmony-swatches">
+                        <div class="harmony-swatch" id="harmony-tri1"></div>
+                        <div class="harmony-swatch" id="harmony-tri2"></div>
+                    </div>
+                </div>
+
+                <div class="harmony-section">
+                    <div class="harmony-label">Split Complementary</div>
+                    <div class="harmony-swatches">
+                        <div class="harmony-swatch" id="harmony-split1"></div>
+                        <div class="harmony-swatch" id="harmony-split2"></div>
+                    </div>
+                </div>
+            </div>
 
             <div id="palette-section">
                 <div id="palettes-container"></div>
@@ -2357,4 +2982,5 @@
             </div>
         </div>
     </div>
+    <div id="toast"></div>
 </body>

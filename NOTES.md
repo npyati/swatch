@@ -6,7 +6,7 @@ Single-file color picker and gradient generator web application. Users can selec
 
 ## Technical Stack
 
-- **Frontend**: Pure HTML/CSS/JavaScript with jQuery
+- **Frontend**: Pure HTML/CSS/JavaScript (vanilla JS, no dependencies)
 - **Fonts**: Google Fonts (Dongle, Koulen)
 - **Storage**: localStorage with JSON serialization
 - **Export**: Canvas API for PNG generation (1920x1080)
@@ -52,34 +52,36 @@ palettes = [
 ## Todos
 
 ### Features
-- [ ] Add color copying to clipboard on click
-- [ ] Keyboard shortcuts for common actions
-- [ ] Undo/redo for palette edits
-- [ ] Import/export palettes as JSON
-- [ ] Color harmony suggestions (complementary, triadic, etc.)
-- [ ] Eye dropper tool for sampling colors from images
-- [ ] Gradient animation preview
+- [x] Add color copying (hex) to clipboard on click
+- [x] Color harmony suggestions (complementary, triadic, analogous, split-complementary)
+- [ ] Eye dropper tool for sampling colors from screen
+- [ ] Gradient animation preview - NP: ???
+- [x] Be able to save individual colors and palettes as .SVG files that will show a preview in a Mac or Windows filesystem. Then, accept drag and drop of these into the window - colors update the picker, palettes get added as a palette w/ name
 
 ### UX Improvements
-- [ ] Drag to reorder colors within palettes
-- [ ] Drag to reorder palettes
-- [ ] Delete confirmation dialog
-- [ ] Toast notifications for actions (saved, deleted, etc.)
-- [ ] Color name display (closest named color)
+- [x] On mobile, tab icons are blue and not responsive to background contrast
+- [x] On mobile, swatch icons in the palette in gradient view run out of the box and off the screen
+- [x] Drag to reorder colors within palettes
+- [x] Drag to reorder palettes
+- [x] Delete confirmation dialog (removed - now deletes directly)
+- [x] Toast notifications for actions (saved, deleted, etc.)
+- [x] Remove the palette emoji when there are no palettes. does not keep with clean aesthetic of app.
+- [ ] No toast for choosing harmony colors - not needed
+
 
 ### Technical
-- [ ] Add accessibility features (ARIA labels, keyboard navigation)
-- [ ] Consider removing jQuery dependency (use vanilla JS)
+- [x] Add accessibility features (ARIA labels, keyboard navigation with shortcuts)
+- [x] Consider removing jQuery dependency (use vanilla JS)
 - [ ] Add service worker for offline support
-- [ ] Optimize for mobile touch interactions
-- [ ] Add color space conversions (HSL, HSV)
+- [x] Optimize for mobile touch interactions (44px touch targets, better feedback)
+- [x] Add color space conversions (RGB ↔ HSL for harmonies)
 
 ### Polish
-- [ ] Add loading states for export
-- [ ] Better empty states (no palettes, no colors)
-- [ ] Smooth transitions between modes
+- [x] Add loading states for export
+- [x] Better empty states (no palettes, no colors)
+- [x] Smooth transitions between modes
 - [ ] Tutorial/onboarding for first-time users
-- [ ] Get rid of cheesy alert for deleting palette - just delete. Maybe allow undo shortcut key 
+- [x] Get rid of cheesy alert for deleting palette - just delete. Maybe allow undo shortcut key 
 
 ## Session History Notes
 
@@ -87,3 +89,7 @@ palettes = [
 - Named "swatch" after exploring many alternatives
 - Significant debugging around palette selection click handlers
 - Root cause: invalid hex values (missing #) caused silent CSS failures
+- Major polish update: Added toast notifications, loading states, empty states, smooth transitions, and fixed remaining jQuery bug
+- Feature-rich update: Added color harmonies, keyboard shortcuts, and mobile accessibility improvements (removed color name display as not useful)
+- SVG export/import: Full SVG file support with drag-and-drop, making palettes portable and shareable
+- Polish refinements: Fixed SVG export aesthetics, improved drag-and-drop UX, contrast-sensitive export icon, overlay toggle state persistence
