@@ -201,6 +201,62 @@
             border-color: rgba(255, 255, 255, 0.5);
         }
 
+        #overlay-controls {
+            display: none;
+        }
+
+        body.gradient-mode #overlay-controls {
+            display: block;
+        }
+
+        #gradient-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .overlay-slider {
+            width: 100%;
+            height: 30px;
+            margin-bottom: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        body.dark-bg .overlay-slider {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .overlay-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+        }
+
+        body.dark-bg .overlay-slider::-webkit-slider-thumb {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .overlay-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            cursor: pointer;
+            border: none;
+        }
+
+        body.dark-bg .overlay-slider::-moz-range-thumb {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -621,6 +677,13 @@
         var currentMode = 'picker';
         var selectedPaletteId = null;
         var currentGradientType = 'linear-right';
+        var overlaySettings = {
+            enabled: false,
+            triangleSize: 50,
+            regularity: 50,
+            depth: 30,
+            polygonType: 'triangles'
+        };
 
         function update(elem){
             
@@ -830,34 +893,61 @@
             const palette = palettes.find(p => p.id == selectedPaletteId);
             if (!palette || palette.colors.length === 0) {
                 $('#gradient-preview').css('background', 'rgba(0,0,0,0.1)');
+                $('#gradient-canvas').hide();
                 $('.action-btn').prop('disabled', true);
                 return;
             }
 
             $('.action-btn').prop('disabled', false);
-            // If only 1 color, duplicate it to make a solid color gradient
             const colors = palette.colors.length === 1
                 ? [palette.colors[0], palette.colors[0]]
                 : palette.colors;
-            const colorStops = colors.join(', ');
-            let gradientCSS = '';
 
-            switch(currentGradientType) {
-                case 'linear-right':
-                    gradientCSS = `linear-gradient(to right, ${colorStops})`;
-                    break;
-                case 'linear-bottom':
-                    gradientCSS = `linear-gradient(to bottom, ${colorStops})`;
-                    break;
-                case 'linear-diagonal':
-                    gradientCSS = `linear-gradient(135deg, ${colorStops})`;
-                    break;
-                case 'radial':
-                    gradientCSS = `radial-gradient(circle, ${colorStops})`;
-                    break;
+            if (overlaySettings.enabled) {
+                // Switch to canvas rendering
+                $('#gradient-preview').hide();
+                $('#gradient-canvas').show();
+
+                const canvas = document.getElementById('gradient-canvas');
+                const container = document.getElementById('gradient-content');
+
+                // Set canvas size to match container
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+
+                // Render with overlay
+                renderGradientToCanvas(
+                    canvas,
+                    colors,
+                    currentGradientType,
+                    true,
+                    overlaySettings
+                );
+            } else {
+                // Use CSS gradient
+                $('#gradient-canvas').hide();
+                $('#gradient-preview').show();
+
+                const colorStops = colors.join(', ');
+                let gradientCSS = '';
+
+                switch(currentGradientType) {
+                    case 'linear-right':
+                        gradientCSS = `linear-gradient(to right, ${colorStops})`;
+                        break;
+                    case 'linear-bottom':
+                        gradientCSS = `linear-gradient(to bottom, ${colorStops})`;
+                        break;
+                    case 'linear-diagonal':
+                        gradientCSS = `linear-gradient(135deg, ${colorStops})`;
+                        break;
+                    case 'radial':
+                        gradientCSS = `radial-gradient(circle, ${colorStops})`;
+                        break;
+                }
+
+                $('#gradient-preview').css('background', gradientCSS);
             }
-
-            $('#gradient-preview').css('background', gradientCSS);
         }
 
         function selectGradientType(type) {
@@ -904,35 +994,506 @@
             const canvas = document.createElement('canvas');
             canvas.width = 1920;
             canvas.height = 1080;
-            const ctx = canvas.getContext('2d');
 
-            // If only 1 color, duplicate it
-            const colorStops = palette.colors.length === 1
+            const colors = palette.colors.length === 1
                 ? [palette.colors[0], palette.colors[0]]
                 : palette.colors;
-            const gradient = currentGradientType.startsWith('radial')
-                ? ctx.createRadialGradient(960, 540, 0, 960, 540, 960)
-                : currentGradientType === 'linear-bottom'
-                ? ctx.createLinearGradient(0, 0, 0, 1080)
-                : currentGradientType === 'linear-diagonal'
-                ? ctx.createLinearGradient(0, 0, 1920, 1080)
-                : ctx.createLinearGradient(0, 0, 1920, 0);
 
-            colorStops.forEach((color, i) => {
-                gradient.addColorStop(i / (colorStops.length - 1), color);
-            });
-
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 1920, 1080);
+            // Render with or without overlay
+            renderGradientToCanvas(
+                canvas,
+                colors,
+                currentGradientType,
+                overlaySettings.enabled,
+                overlaySettings
+            );
 
             canvas.toBlob(function(blob) {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `gradient-${palette.name.toLowerCase().replace(/\s+/g, '-')}.png`;
+                const overlayPrefix = overlaySettings.enabled ? 'lowpoly-' : '';
+                a.download = `${overlayPrefix}gradient-${palette.name.toLowerCase().replace(/\s+/g, '-')}.png`;
                 a.click();
                 URL.revokeObjectURL(url);
             });
+        }
+
+        // Delaunay Triangulation - Bowyer-Watson Algorithm
+        function delaunayTriangulation(points) {
+            if (points.length < 3) return [];
+
+            // Find bounding box
+            var minX = Infinity, minY = Infinity;
+            var maxX = -Infinity, maxY = -Infinity;
+            points.forEach(function(p) {
+                minX = Math.min(minX, p.x);
+                minY = Math.min(minY, p.y);
+                maxX = Math.max(maxX, p.x);
+                maxY = Math.max(maxY, p.y);
+            });
+
+            // Create super-triangle
+            var dx = maxX - minX;
+            var dy = maxY - minY;
+            var deltaMax = Math.max(dx, dy) * 2;
+
+            var p1 = {x: minX - 1, y: minY - 1};
+            var p2 = {x: minX - 1, y: maxY + deltaMax};
+            var p3 = {x: maxX + deltaMax, y: minY - 1};
+
+            var triangles = [{p1: p1, p2: p2, p3: p3}];
+
+            // Add points incrementally
+            points.forEach(function(point) {
+                var badTriangles = [];
+
+                // Find bad triangles
+                triangles.forEach(function(triangle) {
+                    var circle = getCircumcircle(triangle.p1, triangle.p2, triangle.p3);
+                    if (isInsideCircumcircle(point, circle)) {
+                        badTriangles.push(triangle);
+                    }
+                });
+
+                // Find boundary polygon
+                var polygon = [];
+                badTriangles.forEach(function(triangle) {
+                    var edges = [
+                        {p1: triangle.p1, p2: triangle.p2},
+                        {p1: triangle.p2, p2: triangle.p3},
+                        {p1: triangle.p3, p2: triangle.p1}
+                    ];
+
+                    edges.forEach(function(edge) {
+                        var shared = false;
+                        badTriangles.forEach(function(other) {
+                            if (other === triangle) return;
+                            if (edgeInTriangle(edge, other)) {
+                                shared = true;
+                            }
+                        });
+
+                        if (!shared) {
+                            polygon.push(edge);
+                        }
+                    });
+                });
+
+                // Remove bad triangles
+                triangles = triangles.filter(function(t) {
+                    return badTriangles.indexOf(t) === -1;
+                });
+
+                // Add new triangles
+                polygon.forEach(function(edge) {
+                    triangles.push({
+                        p1: edge.p1,
+                        p2: edge.p2,
+                        p3: point
+                    });
+                });
+            });
+
+            // Remove triangles connected to super-triangle
+            triangles = triangles.filter(function(triangle) {
+                return triangle.p1 !== p1 && triangle.p1 !== p2 && triangle.p1 !== p3 &&
+                       triangle.p2 !== p1 && triangle.p2 !== p2 && triangle.p2 !== p3 &&
+                       triangle.p3 !== p1 && triangle.p3 !== p2 && triangle.p3 !== p3;
+            });
+
+            return triangles;
+        }
+
+        function getCircumcircle(p1, p2, p3) {
+            var ax = p1.x, ay = p1.y;
+            var bx = p2.x, by = p2.y;
+            var cx = p3.x, cy = p3.y;
+
+            var d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+            if (Math.abs(d) < 0.0001) {
+                return {x: ax, y: ay, radius: Infinity};
+            }
+
+            var ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d;
+            var uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d;
+
+            var radius = Math.sqrt((ax - ux) * (ax - ux) + (ay - uy) * (ay - uy));
+
+            return {x: ux, y: uy, radius: radius};
+        }
+
+        function isInsideCircumcircle(point, circle) {
+            var dx = point.x - circle.x;
+            var dy = point.y - circle.y;
+            var distSq = dx * dx + dy * dy;
+            return distSq < circle.radius * circle.radius;
+        }
+
+        function edgeInTriangle(edge, triangle) {
+            var edges = [
+                {p1: triangle.p1, p2: triangle.p2},
+                {p1: triangle.p2, p2: triangle.p3},
+                {p1: triangle.p3, p2: triangle.p1}
+            ];
+
+            for (var i = 0; i < edges.length; i++) {
+                var e = edges[i];
+                if ((e.p1 === edge.p1 && e.p2 === edge.p2) ||
+                    (e.p1 === edge.p2 && e.p2 === edge.p1)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function generatePoints(width, height, cellSize, jitter) {
+            var points = [];
+            var jitterAmount = cellSize * (jitter / 100);
+
+            for (var y = -cellSize; y < height + cellSize; y += cellSize) {
+                for (var x = -cellSize; x < width + cellSize; x += cellSize) {
+                    var jitterX = (Math.random() - 0.5) * jitterAmount;
+                    var jitterY = (Math.random() - 0.5) * jitterAmount;
+                    points.push({
+                        x: x + jitterX,
+                        y: y + jitterY
+                    });
+                }
+            }
+
+            return points;
+        }
+
+        function computeVoronoiDiagram(points, triangles, width, height) {
+            var cells = [];
+            console.log('Computing Voronoi diagram with', points.length, 'points and', triangles.length, 'triangles');
+
+            // Build point-to-triangles mapping
+            var pointTriangles = {};
+            points.forEach(function(p, i) {
+                pointTriangles[i] = [];
+            });
+
+            triangles.forEach(function(tri) {
+                // Find indices of triangle vertices in points array
+                points.forEach(function(p, i) {
+                    if (p === tri.p1 || p === tri.p2 || p === tri.p3) {
+                        pointTriangles[i].push(tri);
+                    }
+                });
+            });
+
+            console.log('Point-to-triangles mapping built');
+
+            // For each point, build its Voronoi cell
+            points.forEach(function(point, pointIndex) {
+                var tris = pointTriangles[pointIndex];
+                if (tris.length === 0) return;
+
+                // Get circumcenters of all triangles containing this point
+                var circumcenters = tris.map(function(tri) {
+                    var circle = getCircumcircle(tri.p1, tri.p2, tri.p3);
+                    return {x: circle.x, y: circle.y, triangle: tri};
+                });
+
+                // Sort circumcenters in circular order around the point
+                circumcenters.sort(function(a, b) {
+                    var angleA = Math.atan2(a.y - point.y, a.x - point.x);
+                    var angleB = Math.atan2(b.y - point.y, b.x - point.x);
+                    return angleA - angleB;
+                });
+
+                // Extract vertices
+                var vertices = circumcenters.map(function(cc) {
+                    return {x: cc.x, y: cc.y};
+                });
+
+                // Clip cell to canvas bounds
+                vertices = clipCellToCanvas(vertices, width, height);
+
+                if (vertices.length >= 3) {
+                    cells.push({
+                        point: point,
+                        vertices: vertices
+                    });
+                }
+            });
+
+            console.log('Generated', cells.length, 'Voronoi cells');
+            return cells;
+        }
+
+        function clipCellToCanvas(vertices, width, height) {
+            if (vertices.length === 0) return [];
+
+            // Clip against four edges using Sutherland-Hodgman
+            // Define edges in counter-clockwise order with inside on the left
+            var clipped = vertices;
+            console.log('Before clipping:', clipped.length, 'vertices');
+
+            // Bottom edge: (0, 0) → (width, 0), inside is above (y > 0)
+            clipped = clipPolygonEdge(clipped, {x: 0, y: 0}, {x: width, y: 0}, true);
+            console.log('After bottom edge:', clipped.length, 'vertices');
+
+            // Right edge: (width, 0) → (width, height), inside is left (x < width)
+            clipped = clipPolygonEdge(clipped, {x: width, y: 0}, {x: width, y: height}, true);
+            console.log('After right edge:', clipped.length, 'vertices');
+
+            // Top edge: (width, height) → (0, height), inside is below (y < height)
+            clipped = clipPolygonEdge(clipped, {x: width, y: height}, {x: 0, y: height}, true);
+            console.log('After top edge:', clipped.length, 'vertices');
+
+            // Left edge: (0, height) → (0, 0), inside is right (x > 0)
+            clipped = clipPolygonEdge(clipped, {x: 0, y: height}, {x: 0, y: 0}, true);
+            console.log('After left edge:', clipped.length, 'vertices');
+
+            return clipped;
+        }
+
+        function clipPolygonEdge(polygon, edgeP1, edgeP2, inside) {
+            if (polygon.length === 0) return [];
+
+            var output = [];
+            var prevVertex = polygon[polygon.length - 1];
+
+            polygon.forEach(function(vertex) {
+                var prevInside = isLeftOfEdge(prevVertex, edgeP1, edgeP2) === inside;
+                var vertexInside = isLeftOfEdge(vertex, edgeP1, edgeP2) === inside;
+
+                if (vertexInside) {
+                    if (!prevInside) {
+                        var intersection = lineIntersection(prevVertex, vertex, edgeP1, edgeP2);
+                        if (intersection) output.push(intersection);
+                    }
+                    output.push(vertex);
+                } else if (prevInside) {
+                    var intersection = lineIntersection(prevVertex, vertex, edgeP1, edgeP2);
+                    if (intersection) output.push(intersection);
+                }
+
+                prevVertex = vertex;
+            });
+
+            return output;
+        }
+
+        function isLeftOfEdge(point, edgeP1, edgeP2) {
+            return ((edgeP2.x - edgeP1.x) * (point.y - edgeP1.y) - (edgeP2.y - edgeP1.y) * (point.x - edgeP1.x)) > 0;
+        }
+
+        function lineIntersection(p1, p2, p3, p4) {
+            var x1 = p1.x, y1 = p1.y;
+            var x2 = p2.x, y2 = p2.y;
+            var x3 = p3.x, y3 = p3.y;
+            var x4 = p4.x, y4 = p4.y;
+
+            var denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if (Math.abs(denom) < 0.0001) return null;
+
+            var t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+
+            return {
+                x: x1 + t * (x2 - x1),
+                y: y1 + t * (y2 - y1)
+            };
+        }
+
+        function sampleGradientColor(x, y, colors, gradientType) {
+            var position = 0;
+
+            switch(gradientType) {
+                case 'linear-right':
+                    position = x;
+                    break;
+                case 'linear-bottom':
+                    position = y;
+                    break;
+                case 'linear-diagonal':
+                    position = (x + y) / 2;
+                    break;
+                case 'radial':
+                    var dx = x - 0.5;
+                    var dy = y - 0.5;
+                    position = Math.sqrt(dx * dx + dy * dy) * 2;
+                    break;
+            }
+
+            // Clamp position
+            position = Math.max(0, Math.min(1, position));
+
+            // Find color stops
+            var segmentCount = colors.length - 1;
+            var segment = position * segmentCount;
+            var index = Math.floor(segment);
+            var fraction = segment - index;
+
+            if (index >= colors.length - 1) {
+                return colors[colors.length - 1];
+            }
+
+            // Interpolate between colors
+            return interpolateColor(colors[index], colors[index + 1], fraction);
+        }
+
+        function interpolateColor(color1, color2, fraction) {
+            var c1 = hexToRGB(color1);
+            var c2 = hexToRGB(color2);
+
+            var r = Math.round(c1[0] + (c2[0] - c1[0]) * fraction);
+            var g = Math.round(c1[1] + (c2[1] - c1[1]) * fraction);
+            var b = Math.round(c1[2] + (c2[2] - c1[2]) * fraction);
+
+            return '#' + rgbToHex(r, g, b);
+        }
+
+        function applyDepthShading(baseColor, depthAmount) {
+            if (depthAmount === 0) return baseColor;
+
+            var rgb = hexToRGB(baseColor);
+            var variation = (Math.random() - 0.5) * 2;
+            var factor = 1 + (variation * (depthAmount / 100));
+
+            var r = Math.max(0, Math.min(255, Math.round(rgb[0] * factor)));
+            var g = Math.max(0, Math.min(255, Math.round(rgb[1] * factor)));
+            var b = Math.max(0, Math.min(255, Math.round(rgb[2] * factor)));
+
+            return '#' + rgbToHex(r, g, b);
+        }
+
+        function saveOverlaySettings() {
+            localStorage.setItem('overlaySettings', JSON.stringify(overlaySettings));
+        }
+
+        function loadOverlaySettings() {
+            var saved = localStorage.getItem('overlaySettings');
+            if (saved) {
+                overlaySettings = JSON.parse(saved);
+
+                // Update UI
+                $('.overlay-toggle').removeClass('active');
+                $(`.overlay-toggle[data-overlay-enabled="${overlaySettings.enabled}"]`).addClass('active');
+
+                $('#triangle-size').val(overlaySettings.triangleSize);
+                $('#size-value').text(overlaySettings.triangleSize);
+
+                $('#triangle-regularity').val(overlaySettings.regularity);
+                $('#regularity-value').text(overlaySettings.regularity);
+
+                $('#triangle-depth').val(overlaySettings.depth);
+                $('#depth-value').text(overlaySettings.depth);
+
+                // Restore polygon type
+                if (overlaySettings.polygonType) {
+                    $('.polygon-type-option').removeClass('active');
+                    $(`.polygon-type-option[data-polygon-type="${overlaySettings.polygonType}"]`).addClass('active');
+                    var label = overlaySettings.polygonType === 'triangles' ? 'Triangles' : 'Voronoi';
+                    $('#polygon-type-value').text(label);
+                }
+
+                if (overlaySettings.enabled) {
+                    $('#overlay-parameters').show();
+                }
+            }
+        }
+
+        function createCanvasGradient(ctx, width, height, colorStops, gradientType) {
+            var gradient;
+
+            switch(gradientType) {
+                case 'radial':
+                    gradient = ctx.createRadialGradient(
+                        width/2, height/2, 0,
+                        width/2, height/2, Math.max(width, height)/2
+                    );
+                    break;
+                case 'linear-bottom':
+                    gradient = ctx.createLinearGradient(0, 0, 0, height);
+                    break;
+                case 'linear-diagonal':
+                    gradient = ctx.createLinearGradient(0, 0, width, height);
+                    break;
+                default: // linear-right
+                    gradient = ctx.createLinearGradient(0, 0, width, 0);
+                    break;
+            }
+
+            colorStops.forEach(function(color, i) {
+                gradient.addColorStop(i / (colorStops.length - 1), color);
+            });
+
+            return gradient;
+        }
+
+        function renderGradientToCanvas(canvas, colors, gradientType, withOverlay, settings) {
+            var ctx = canvas.getContext('2d');
+            var width = canvas.width;
+            var height = canvas.height;
+
+            // Step 1: Draw gradient background
+            var colorStops = colors.length === 1 ? [colors[0], colors[0]] : colors;
+            var gradient = createCanvasGradient(ctx, width, height, colorStops, gradientType);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Step 2: If overlay enabled, draw polygons
+            if (withOverlay) {
+                // Generate points
+                var jitter = 100 - settings.regularity;
+                var points = generatePoints(width, height, settings.triangleSize, jitter);
+
+                // Triangulate
+                var triangles = delaunayTriangulation(points);
+
+                console.log('Polygon type:', settings.polygonType);
+                if (settings.polygonType === 'voronoi') {
+                    console.log('Rendering Voronoi cells');
+                    // Compute and draw Voronoi cells
+                    var voronoiCells = computeVoronoiDiagram(points, triangles, width, height);
+
+                    voronoiCells.forEach(function(cell) {
+                        // Sample color at cell center (the original point)
+                        var normalizedX = cell.point.x / width;
+                        var normalizedY = cell.point.y / height;
+                        var baseColor = sampleGradientColor(normalizedX, normalizedY, colors, gradientType);
+                        var finalColor = applyDepthShading(baseColor, settings.depth);
+
+                        // Draw cell polygon
+                        ctx.fillStyle = finalColor;
+                        ctx.beginPath();
+                        ctx.moveTo(cell.vertices[0].x, cell.vertices[0].y);
+                        for (var i = 1; i < cell.vertices.length; i++) {
+                            ctx.lineTo(cell.vertices[i].x, cell.vertices[i].y);
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                    });
+                } else {
+                    // Draw triangles
+                    triangles.forEach(function(triangle) {
+                        // Calculate centroid
+                        var centroidX = (triangle.p1.x + triangle.p2.x + triangle.p3.x) / 3;
+                        var centroidY = (triangle.p1.y + triangle.p2.y + triangle.p3.y) / 3;
+
+                        // Sample gradient color at centroid
+                        var normalizedX = centroidX / width;
+                        var normalizedY = centroidY / height;
+                        var baseColor = sampleGradientColor(normalizedX, normalizedY, colors, gradientType);
+
+                        // Apply depth shading
+                        var finalColor = applyDepthShading(baseColor, settings.depth);
+
+                        // Draw triangle
+                        ctx.fillStyle = finalColor;
+                        ctx.beginPath();
+                        ctx.moveTo(triangle.p1.x, triangle.p1.y);
+                        ctx.lineTo(triangle.p2.x, triangle.p2.y);
+                        ctx.lineTo(triangle.p3.x, triangle.p3.y);
+                        ctx.closePath();
+                        ctx.fill();
+                    });
+                }
+            }
         }
 
         function switchToGradientMode(paletteId) {
@@ -1035,6 +1596,7 @@
 
         $(document).ready(function(){
             loadPalettes();
+            loadOverlaySettings();
             switchMode('picker');
 
             // Event delegation for palette row clicks
@@ -1053,7 +1615,7 @@
                 createNewPalette();
             });
 
-            $('.gradient-option').on('click', function() {
+            $('.gradient-option[data-gradient-type]').on('click', function() {
                 selectGradientType($(this).data('gradient-type'));
             });
 
@@ -1063,6 +1625,64 @@
 
             $('#download-png-btn').on('click', function() {
                 downloadGradientPNG();
+            });
+
+            // Overlay toggle
+            $('.overlay-toggle').on('click', function() {
+                var enabled = $(this).data('overlay-enabled');
+                overlaySettings.enabled = enabled;
+
+                $('.overlay-toggle').removeClass('active');
+                $(this).addClass('active');
+
+                if (enabled) {
+                    $('#overlay-parameters').show();
+                } else {
+                    $('#overlay-parameters').hide();
+                }
+
+                updateGradientDisplay();
+                saveOverlaySettings();
+            });
+
+            // Overlay parameter sliders
+            $('.overlay-slider').on('input', function() {
+                var value = parseInt($(this).val());
+
+                switch(this.id) {
+                    case 'triangle-size':
+                        overlaySettings.triangleSize = value;
+                        $('#size-value').text(value);
+                        break;
+                    case 'triangle-regularity':
+                        overlaySettings.regularity = value;
+                        $('#regularity-value').text(value);
+                        break;
+                    case 'triangle-depth':
+                        overlaySettings.depth = value;
+                        $('#depth-value').text(value);
+                        break;
+                }
+
+                updateGradientDisplay();
+                saveOverlaySettings();
+            });
+
+            // Polygon type selector
+            $('.polygon-type-option').on('click', function() {
+                var polygonType = $(this).data('polygon-type');
+                console.log('Polygon type clicked:', polygonType);
+                overlaySettings.polygonType = polygonType;
+
+                $('.polygon-type-option').removeClass('active');
+                $(this).addClass('active');
+
+                var label = polygonType === 'triangles' ? 'Triangles' : 'Voronoi';
+                $('#polygon-type-value').text(label);
+
+                console.log('Updated overlay settings:', overlaySettings);
+                updateGradientDisplay();
+                saveOverlaySettings();
             });
 
             $('.text').on('input',function(){
@@ -1134,6 +1754,7 @@
                 </div>
                 <div id="gradient-content">
                     <div id="gradient-preview"></div>
+                    <canvas id="gradient-canvas" style="display: none;"></canvas>
                 </div>
             </div>
         </div>
@@ -1147,6 +1768,39 @@
                         <div class="gradient-option" data-gradient-type="linear-bottom">Vertical</div>
                         <div class="gradient-option" data-gradient-type="linear-diagonal">Diagonal</div>
                         <div class="gradient-option" data-gradient-type="radial">Radial</div>
+                    </div>
+                </div>
+
+                <div class="control-group" id="overlay-controls">
+                    <label class="control-label">Low-Poly Overlay</label>
+                    <div class="gradient-options">
+                        <div class="gradient-option overlay-toggle active" data-overlay-enabled="false">Off</div>
+                        <div class="gradient-option overlay-toggle" data-overlay-enabled="true">On</div>
+                    </div>
+                </div>
+
+                <div class="control-group" id="overlay-parameters" style="display: none;">
+                    <label class="control-label">
+                        Triangle Size: <span id="size-value">50</span>
+                    </label>
+                    <input type="range" min="20" max="150" value="50" class="overlay-slider" id="triangle-size">
+
+                    <label class="control-label">
+                        Regularity: <span id="regularity-value">50</span>
+                    </label>
+                    <input type="range" min="0" max="100" value="50" class="overlay-slider" id="triangle-regularity">
+
+                    <label class="control-label">
+                        Depth: <span id="depth-value">30</span>
+                    </label>
+                    <input type="range" min="0" max="100" value="30" class="overlay-slider" id="triangle-depth">
+
+                    <label class="control-label">
+                        Polygon Type: <span id="polygon-type-value">Triangles</span>
+                    </label>
+                    <div class="gradient-options">
+                        <div class="gradient-option polygon-type-option active" data-polygon-type="triangles">Triangles</div>
+                        <div class="gradient-option polygon-type-option" data-polygon-type="voronoi">Voronoi</div>
                     </div>
                 </div>
 

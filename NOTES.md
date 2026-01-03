@@ -79,6 +79,7 @@ palettes = [
 - [ ] Better empty states (no palettes, no colors)
 - [ ] Smooth transitions between modes
 - [ ] Tutorial/onboarding for first-time users
+- [ ] Get rid of cheesy alert for deleting palette - just delete. Maybe allow undo shortcut key 
 
 ## Session History Notes
 
