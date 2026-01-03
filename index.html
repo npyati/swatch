@@ -2597,6 +2597,27 @@ ${stripes}
                 exportColorAsSVG(hex);
             });
 
+            // Eye dropper tool
+            const eyedropperBtn = qs('#eyedropper-btn');
+            if (!window.EyeDropper) {
+                // Hide button if API not supported
+                eyedropperBtn.style.display = 'none';
+            } else {
+                eyedropperBtn.addEventListener('click', async function() {
+                    try {
+                        const eyeDropper = new EyeDropper();
+                        const result = await eyeDropper.open();
+                        loadColor(result.sRGBHex);
+                        showToast(`Picked ${result.sRGBHex}`);
+                    } catch (err) {
+                        // User cancelled or error occurred
+                        if (err.name !== 'AbortError') {
+                            showToast('Eye dropper failed');
+                        }
+                    }
+                });
+            }
+
             // Drag and drop for SVG import
             let dragCounter = 0;
 
@@ -2642,7 +2663,6 @@ ${stripes}
                     if (rgb) {
                         const hexColor = '#' + rgbToHex(parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2]));
                         loadColor(hexColor);
-                        showToast(`Loaded harmony color`);
                     }
                 });
             });
@@ -2842,7 +2862,10 @@ ${stripes}
                 <div id="picker-content">
                     rgb: <div class='text' id="rgb">0,0,0</div><br/>
                     hex: <input class="text edit" id="hex" value="#000"><br/>
-                    <button id="export-color-svg" class="icon-btn text" style="margin-top: 10px; background: transparent; border: none; cursor: pointer; font-size: 1.2rem;" title="Export as SVG">↓</button>
+                    <div style="margin-top: 10px;">
+                        <button id="eyedropper-btn" class="icon-btn text" style="background: transparent; border: none; cursor: pointer; font-size: 1.2rem; margin-right: 8px;" title="Pick color from screen">💧</button>
+                        <button id="export-color-svg" class="icon-btn text" style="background: transparent; border: none; cursor: pointer; font-size: 1.2rem;" title="Export as SVG">↓</button>
+                    </div>
                 </div>
                 <div id="gradient-content">
                     <div id="gradient-preview"></div>
